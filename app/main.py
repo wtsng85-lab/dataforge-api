@@ -1,10 +1,17 @@
 """DataForge — Universal Data Formatter & Validator API."""
 
-from fastapi import FastAPI
+import time
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.middleware import RapidAPIAuthMiddleware, RequestTimingMiddleware
+from app.middleware import (
+    RapidAPIAuthMiddleware,
+    RateLimitMiddleware,
+    ResponseCacheMiddleware,
+    RequestTimingMiddleware,
+)
 from app.routers import phone, iban, creditcard, vat, postalcode, date
 
 DESCRIPTION = """
@@ -23,12 +30,19 @@ The Swiss Army knife for data validation. One API to validate, format, and parse
 Stop subscribing to 6 different validation APIs. DataForge bundles all structured data
 validation into a single, blazing-fast API with sub-50ms response times.
 
+### Features
+- **Rate limiting** — Per-client rate limiting with clear headers
+- **Response caching** — GET requests cached for 5 minutes (10k entries)
+- **Bulk operations** — Validate up to 100 phone numbers per request
+
 ### Use Cases
 - **Fintech** — Validate IBANs, credit cards, and VAT numbers at checkout
 - **E-commerce** — Validate shipping addresses and phone numbers internationally
 - **SaaS** — Clean and normalize user-submitted data at registration
 - **Data Pipelines** — Bulk validate and format phone numbers, dates, postal codes
 """
+
+_start_time = time.time()
 
 app = FastAPI(
     title="DataForge",
@@ -40,8 +54,10 @@ app = FastAPI(
     license_info={"name": "MIT"},
 )
 
-# Middleware (order matters — outermost first)
+# Middleware (order matters — outermost first, executes first on request)
 app.add_middleware(RequestTimingMiddleware)
+app.add_middleware(ResponseCacheMiddleware)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=120)
 app.add_middleware(RapidAPIAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +65,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Global exception handler — never leak stack traces
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "detail": "An unexpected error occurred. Please try again.",
+        },
+    )
+
 
 # Routers
 app.include_router(phone.router)
@@ -66,10 +95,25 @@ async def root():
         "version": "1.0.0",
         "description": "Universal Data Formatter & Validator API",
         "docs": "/docs",
+        "endpoints": {
+            "phone": "/phone/validate",
+            "iban": "/iban/validate",
+            "creditcard": "/creditcard/validate",
+            "vat": "/vat/validate",
+            "postalcode": "/postalcode/validate",
+            "date_convert": "/date/convert",
+            "date_detect": "/date/detect",
+        },
     }
 
 
 @app.get("/health", tags=["Health"], summary="Health check")
 async def health():
     """Check API health and uptime."""
-    return {"status": "ok", "service": "DataForge", "version": "1.0.0"}
+    uptime = time.time() - _start_time
+    return {
+        "status": "ok",
+        "service": "DataForge",
+        "version": "1.0.0",
+        "uptime_seconds": round(uptime, 1),
+    }

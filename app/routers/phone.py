@@ -10,11 +10,11 @@ router = APIRouter(prefix="/phone", tags=["Phone"])
 
 @router.get("/validate", summary="Validate a phone number")
 async def phone_validate(
-    number: str = Query(..., description="Phone number to validate", examples=["+14155552671"]),
-    country_code: str | None = Query(None, description="ISO country code", examples=["US"]),
+    number: str = Query(..., description="Phone number to validate", examples=["+14155552671"], max_length=30),
+    country_code: str | None = Query(None, description="ISO country code", examples=["US"], max_length=3),
 ):
     """Validate a phone number and return parsed details including carrier, country, and timezone."""
-    return validate_phone(number, country_code)
+    return validate_phone(number.strip(), country_code)
 
 
 @router.post("/validate", summary="Validate a phone number (POST)")
@@ -25,12 +25,12 @@ async def phone_validate_post(req: PhoneValidateRequest):
 
 @router.get("/format", summary="Format a phone number")
 async def phone_format(
-    number: str = Query(..., description="Phone number", examples=["+14155552671"]),
-    country_code: str | None = Query(None, description="ISO country code"),
+    number: str = Query(..., description="Phone number", examples=["+14155552671"], max_length=30),
+    country_code: str | None = Query(None, description="ISO country code", max_length=3),
     format: str = Query("e164", description="Output format: e164, international, national, rfc3966"),
 ):
     """Format a phone number to a specific format (E.164, international, national, RFC3966)."""
-    return format_phone(number, country_code, format)
+    return format_phone(number.strip(), country_code, format)
 
 
 @router.post("/bulk-validate", summary="Bulk validate phone numbers")

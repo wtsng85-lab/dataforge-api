@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "DataForge",
-    "description": "\n## DataForge \u2014 Universal Data Formatter & Validator API\n\nThe Swiss Army knife for data validation. One API to validate, format, and parse:\n\n- **Phone Numbers** \u2014 Validate, format (E.164/international/national), detect carrier & timezone\n- **IBAN** \u2014 Validate, extract bank code, BIC lookup\n- **Credit Cards** \u2014 Luhn check, card type detection (Visa, Mastercard, Amex, etc.)\n- **VAT Numbers** \u2014 EU VAT format validation (28 countries + UK)\n- **Postal Codes** \u2014 Validate ZIP/postal codes for 30+ countries\n- **Dates** \u2014 Convert between 15+ date formats, auto-detect format\n\n### Why DataForge?\nStop subscribing to 6 different validation APIs. DataForge bundles all structured data\nvalidation into a single, blazing-fast API with sub-50ms response times.\n\n### Use Cases\n- **Fintech** \u2014 Validate IBANs, credit cards, and VAT numbers at checkout\n- **E-commerce** \u2014 Validate shipping addresses and phone numbers internationally\n- **SaaS** \u2014 Clean and normalize user-submitted data at registration\n- **Data Pipelines** \u2014 Bulk validate and format phone numbers, dates, postal codes\n",
+    "description": "\n## DataForge \u2014 Universal Data Formatter & Validator API\n\nThe Swiss Army knife for data validation. One API to validate, format, and parse:\n\n- **Phone Numbers** \u2014 Validate, format (E.164/international/national), detect carrier & timezone\n- **IBAN** \u2014 Validate, extract bank code, BIC lookup\n- **Credit Cards** \u2014 Luhn check, card type detection (Visa, Mastercard, Amex, etc.)\n- **VAT Numbers** \u2014 EU VAT format validation (28 countries + UK)\n- **Postal Codes** \u2014 Validate ZIP/postal codes for 30+ countries\n- **Dates** \u2014 Convert between 15+ date formats, auto-detect format\n\n### Why DataForge?\nStop subscribing to 6 different validation APIs. DataForge bundles all structured data\nvalidation into a single, blazing-fast API with sub-50ms response times.\n\n### Features\n- **Rate limiting** \u2014 Per-client rate limiting with clear headers\n- **Response caching** \u2014 GET requests cached for 5 minutes (10k entries)\n- **Bulk operations** \u2014 Validate up to 100 phone numbers per request\n\n### Use Cases\n- **Fintech** \u2014 Validate IBANs, credit cards, and VAT numbers at checkout\n- **E-commerce** \u2014 Validate shipping addresses and phone numbers internationally\n- **SaaS** \u2014 Clean and normalize user-submitted data at registration\n- **Data Pipelines** \u2014 Bulk validate and format phone numbers, dates, postal codes\n",
     "contact": {
       "name": "DataForge API",
       "url": "https://rapidapi.com/"
@@ -28,6 +28,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 30,
               "description": "Phone number to validate",
               "examples": [
                 "+14155552671"
@@ -43,7 +44,8 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 3
                 },
                 {
                   "type": "null"
@@ -133,6 +135,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 30,
               "description": "Phone number",
               "examples": [
                 "+14155552671"
@@ -148,7 +151,8 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 3
                 },
                 {
                   "type": "null"
@@ -249,6 +253,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 50,
               "description": "IBAN to validate",
               "examples": [
                 "DE89370400440532013000"
@@ -333,6 +338,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 25,
               "description": "Credit card number",
               "examples": [
                 "4111111111111111"
@@ -417,6 +423,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 20,
               "description": "EU VAT number",
               "examples": [
                 "DE123456789"
@@ -501,6 +508,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 15,
               "description": "Postal/ZIP code",
               "examples": [
                 "10001"
@@ -515,6 +523,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 3,
               "description": "ISO country code",
               "examples": [
                 "US"
@@ -584,6 +593,26 @@
         }
       }
     },
+    "/postalcode/countries": {
+      "get": {
+        "tags": [
+          "Postal Code"
+        ],
+        "summary": "List supported countries",
+        "description": "List all supported countries with example postal code formats.",
+        "operationId": "postal_countries_postalcode_countries_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/date/convert": {
       "get": {
         "tags": [
@@ -599,6 +628,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 50,
               "description": "Date string",
               "examples": [
                 "03/20/2026"
@@ -613,6 +643,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 20,
               "description": "Source format",
               "examples": [
                 "MM/DD/YYYY"
@@ -627,6 +658,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 20,
               "description": "Target format",
               "examples": [
                 "ISO8601"
@@ -711,6 +743,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "maxLength": 50,
               "description": "Date string to detect",
               "examples": [
                 "2026-03-20"
@@ -774,6 +807,26 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/date/formats": {
+      "get": {
+        "tags": [
+          "Date"
+        ],
+        "summary": "List supported date formats",
+        "description": "List all supported date format names and their patterns.",
+        "operationId": "date_formats_date_formats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
