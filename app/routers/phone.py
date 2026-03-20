@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Query
 
-from app.models import PhoneValidateRequest, PhoneFormatRequest, BulkPhoneRequest
+from app.models import PhoneValidateRequest, BulkPhoneRequest
 from app.validators.phone import validate_phone, format_phone
 
 router = APIRouter(prefix="/phone", tags=["Phone"])

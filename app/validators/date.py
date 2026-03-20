@@ -1,6 +1,6 @@
 """Date format detection, validation, and conversion."""
 
-from datetime import datetime, date
+from datetime import datetime
 
 FORMAT_MAP = {
     "ISO8601": "%Y-%m-%d",

@@ -33,7 +33,7 @@ def validate_iban(iban_str: str) -> dict:
         if bic:
             result["bic"] = str(bic)
             result["bank_name"] = bic.bank_names[0] if hasattr(bic, "bank_names") and bic.bank_names else None
-    except Exception:
+    except (ValueError, AttributeError, KeyError, IndexError):
         result["bic"] = None
         result["bank_name"] = None
 

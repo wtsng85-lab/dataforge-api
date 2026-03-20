@@ -53,17 +53,3 @@ class BulkPhoneRequest(BaseModel):
     country_code: str | None = Field(None, description="Default country code")
 
 
-class BulkEmailRequest(BaseModel):
-    emails: list[str] = Field(..., description="List of items to validate (max 100)", max_length=100)
-
-
-# --- Generic ---
-class HealthResponse(BaseModel):
-    status: str = "ok"
-    service: str = "DataForge"
-    version: str = "1.0.0"
-
-
-class ErrorResponse(BaseModel):
-    error: str
-    detail: str | None = None

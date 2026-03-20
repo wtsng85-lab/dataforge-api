@@ -2,6 +2,8 @@
 
 import re
 
+_CLEAN_RE = re.compile(r"[\s\-]")
+
 # BIN (Bank Identification Number) patterns for card type detection
 CARD_PATTERNS = [
     ("visa", re.compile(r"^4[0-9]{12}(?:[0-9]{3})?$")),
@@ -36,7 +38,7 @@ def detect_card_type(number: str) -> str:
 
 def validate_credit_card(number: str) -> dict:
     """Validate a credit card number."""
-    cleaned = re.sub(r"[\s\-]", "", number)
+    cleaned = _CLEAN_RE.sub("", number)
 
     if not cleaned.isdigit():
         return {
