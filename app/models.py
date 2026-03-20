@@ -47,9 +47,24 @@ class DateDetectRequest(BaseModel):
     date: str = Field(..., description="Date string to detect format of", examples=["2026-03-20"])
 
 
+# --- Email ---
+class EmailValidateRequest(BaseModel):
+    email: str = Field(..., description="Email address to validate", examples=["user@example.com"])
+    check_mx: bool = Field(True, description="Check MX records for domain")
+
+
+# --- Password ---
+class PasswordAnalyzeRequest(BaseModel):
+    password: str = Field(..., description="Password to analyze", examples=["MyP@ss123!"])
+
+
+# --- Crypto ---
+class CryptoValidateRequest(BaseModel):
+    address: str = Field(..., description="Wallet address", examples=["1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"])
+    chain: str | None = Field(None, description="Blockchain: btc, eth (auto-detected if omitted)")
+
+
 # --- Bulk ---
 class BulkPhoneRequest(BaseModel):
     numbers: list[str] = Field(..., description="List of phone numbers (max 100)", max_length=100)
     country_code: str | None = Field(None, description="Default country code")
-
-

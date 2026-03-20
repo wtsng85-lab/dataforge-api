@@ -15,8 +15,9 @@ from app.middleware import (
     RateLimitMiddleware,
     ResponseCacheMiddleware,
     RequestTimingMiddleware,
+    RequestIDMiddleware,
 )
-from app.routers import phone, iban, creditcard, vat, postalcode, date
+from app.routers import phone, iban, creditcard, vat, postalcode, date, email, password, crypto
 
 DESCRIPTION = """
 ## DataForge — Universal Data Formatter & Validator API
@@ -24,25 +25,30 @@ DESCRIPTION = """
 The Swiss Army knife for data validation. One API to validate, format, and parse:
 
 - **Phone Numbers** — Validate, format (E.164/international/national), detect carrier & timezone
+- **Email Addresses** — Syntax check, MX record lookup, disposable email detection
 - **IBAN** — Validate, extract bank code, BIC lookup
 - **Credit Cards** — Luhn check, card type detection (Visa, Mastercard, Amex, etc.)
 - **VAT Numbers** — EU VAT format validation (28 countries + UK)
 - **Postal Codes** — Validate ZIP/postal codes for 30+ countries
 - **Dates** — Convert between 15+ date formats, auto-detect format
+- **Passwords** — Strength analysis, entropy calculation, common password detection
+- **Crypto Wallets** — Bitcoin (legacy/segwit/taproot) & Ethereum address validation
 
 ### Why DataForge?
-Stop subscribing to 6 different validation APIs. DataForge bundles all structured data
+Stop subscribing to 9 different validation APIs. DataForge bundles all structured data
 validation into a single, blazing-fast API with sub-50ms response times.
 
 ### Features
 - **Rate limiting** — Per-client rate limiting with clear headers
 - **Response caching** — GET requests cached for 5 minutes (10k entries)
 - **Bulk operations** — Validate up to 100 phone numbers per request
+- **Request tracking** — Every response includes a unique X-Request-ID header
 
 ### Use Cases
-- **Fintech** — Validate IBANs, credit cards, and VAT numbers at checkout
-- **E-commerce** — Validate shipping addresses and phone numbers internationally
+- **Fintech** — Validate IBANs, credit cards, crypto wallets, and VAT numbers at checkout
+- **E-commerce** — Validate shipping addresses, phone numbers, and emails internationally
 - **SaaS** — Clean and normalize user-submitted data at registration
+- **Security** — Check password strength, detect disposable emails, validate crypto addresses
 - **Data Pipelines** — Bulk validate and format phone numbers, dates, postal codes
 """
 
@@ -51,7 +57,7 @@ _start_time = time.time()
 app = FastAPI(
     title="DataForge",
     description=DESCRIPTION,
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     contact={"name": "DataForge API", "url": "https://rapidapi.com"},
@@ -59,6 +65,7 @@ app = FastAPI(
 )
 
 # Middleware (order matters — outermost first, executes first on request)
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(RequestTimingMiddleware)
 app.add_middleware(ResponseCacheMiddleware)
 app.add_middleware(RateLimitMiddleware, requests_per_minute=120)
@@ -86,28 +93,34 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # Routers
 app.include_router(phone.router)
+app.include_router(email.router)
 app.include_router(iban.router)
 app.include_router(creditcard.router)
 app.include_router(vat.router)
 app.include_router(postalcode.router)
 app.include_router(date.router)
+app.include_router(password.router)
+app.include_router(crypto.router)
 
 
 @app.get("/", tags=["Health"], include_in_schema=False)
 async def root():
     return {
         "service": "DataForge",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "description": "Universal Data Formatter & Validator API",
         "docs": "/docs",
         "endpoints": {
             "phone": "/phone/validate",
+            "email": "/email/validate",
             "iban": "/iban/validate",
             "creditcard": "/creditcard/validate",
             "vat": "/vat/validate",
             "postalcode": "/postalcode/validate",
             "date_convert": "/date/convert",
             "date_detect": "/date/detect",
+            "password": "/password/analyze",
+            "crypto": "/crypto/validate",
         },
     }
 
@@ -119,6 +132,6 @@ async def health():
     return {
         "status": "ok",
         "service": "DataForge",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "uptime_seconds": round(uptime, 1),
     }

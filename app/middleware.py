@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import time
+import uuid
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -175,4 +176,14 @@ class RequestTimingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         elapsed = (time.perf_counter() - start) * 1000
         response.headers["X-Response-Time"] = f"{elapsed:.1f}ms"
+        return response
+
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    """Attach a unique request ID to every response for traceability."""
+
+    async def dispatch(self, request: Request, call_next):
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
         return response

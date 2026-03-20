@@ -559,3 +559,133 @@ async def test_openapi_json(client):
     data = resp.json()
     assert data["info"]["title"] == "DataForge"
     assert len(data["paths"]) >= 10
+
+
+# ========================== Email ==========================
+
+@pytest.mark.anyio
+async def test_email_valid(client):
+    resp = await client.get("/email/validate", params={"email": "test@gmail.com", "check_mx": "false"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+    assert data["domain"] == "gmail.com"
+    assert data["is_free_provider"] is True
+    assert data["is_disposable"] is False
+
+
+@pytest.mark.anyio
+async def test_email_invalid_syntax(client):
+    resp = await client.get("/email/validate", params={"email": "not-an-email", "check_mx": "false"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is False
+
+
+@pytest.mark.anyio
+async def test_email_disposable(client):
+    resp = await client.get("/email/validate", params={"email": "test@mailinator.com", "check_mx": "false"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+    assert data["is_disposable"] is True
+
+
+@pytest.mark.anyio
+async def test_email_post(client):
+    resp = await client.post("/email/validate", json={"email": "user@outlook.com", "check_mx": False})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+    assert data["is_free_provider"] is True
+
+
+# ========================== Password ==========================
+
+@pytest.mark.anyio
+async def test_password_strong(client):
+    resp = await client.get("/password/analyze", params={"password": "MyStr0ng!P@ss#2024"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["strength"] in ("strong", "very_strong")
+    assert data["score"] >= 60
+    assert data["character_analysis"]["has_special"] is True
+
+
+@pytest.mark.anyio
+async def test_password_weak(client):
+    resp = await client.get("/password/analyze", params={"password": "123456"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["strength"] in ("very_weak", "weak")
+    assert data["warnings"]["is_common"] is True
+
+
+@pytest.mark.anyio
+async def test_password_empty(client):
+    resp = await client.get("/password/analyze", params={"password": ""})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["strength"] == "invalid"
+
+
+@pytest.mark.anyio
+async def test_password_post(client):
+    resp = await client.post("/password/analyze", json={"password": "Test@1234"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "score" in data
+    assert "suggestions" in data
+
+
+# ========================== Crypto ==========================
+
+@pytest.mark.anyio
+async def test_crypto_btc_legacy(client):
+    resp = await client.get("/crypto/validate", params={"address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+    assert data["chain"] == "bitcoin"
+    assert data["address_type"] == "p2pkh_legacy"
+
+
+@pytest.mark.anyio
+async def test_crypto_eth(client):
+    resp = await client.get("/crypto/validate", params={"address": "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+    assert data["chain"] == "ethereum"
+
+
+@pytest.mark.anyio
+async def test_crypto_invalid(client):
+    resp = await client.get("/crypto/validate", params={"address": "notanaddress"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is False
+
+
+@pytest.mark.anyio
+async def test_crypto_chains_list(client):
+    resp = await client.get("/crypto/chains")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] >= 2
+
+
+@pytest.mark.anyio
+async def test_crypto_post(client):
+    resp = await client.post("/crypto/validate", json={"address": "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe", "chain": "eth"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["valid"] is True
+
+
+# ========================== Request ID ==========================
+
+@pytest.mark.anyio
+async def test_request_id_header(client):
+    resp = await client.get("/health")
+    assert "X-Request-ID" in resp.headers
