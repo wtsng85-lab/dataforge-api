@@ -1,7 +1,7 @@
 """Middleware for authentication, rate limiting, response caching, and request tracking."""
 
 import hashlib
-import json
+import logging
 import time
 
 from fastapi import Request
@@ -10,6 +10,8 @@ from starlette.responses import JSONResponse, Response
 from cachetools import TTLCache
 
 from app.config import get_settings
+
+logger = logging.getLogger("dataforge")
 
 
 class RapidAPIAuthMiddleware(BaseHTTPMiddleware):
@@ -33,10 +35,7 @@ class RapidAPIAuthMiddleware(BaseHTTPMiddleware):
         if settings.api_key and api_key == settings.api_key:
             return await call_next(request)
 
-        # In dev mode, allow unauthenticated requests
-        if settings.environment == "development":
-            return await call_next(request)
-
+        logger.warning("Unauthorized request: %s %s", request.method, request.url.path)
         return JSONResponse(
             status_code=401,
             content={"error": "Unauthorized", "detail": "Valid API key required"},
@@ -54,8 +53,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, requests_per_minute: int = 120):
         super().__init__(app)
         self.rpm = requests_per_minute
-        # key -> (count, window_start)
-        self._buckets: dict[str, tuple[int, float]] = {}
+        # key -> (count, window_start) — auto-expires after 2 minutes to prevent memory leak
+        self._buckets: TTLCache = TTLCache(maxsize=100_000, ttl=120)
 
     def _get_client_key(self, request: Request) -> str:
         """Identify client by RapidAPI user or API key or IP."""

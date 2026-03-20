@@ -1,15 +1,25 @@
 """Comprehensive API tests for DataForge."""
 
+import os
 import pytest
 from httpx import AsyncClient, ASGITransport
 
-from app.main import app
+# Set a test API key before importing the app so config picks it up
+os.environ["API_KEY"] = "test-key-for-testing"
+
+from app.config import get_settings  # noqa: E402
+get_settings.cache_clear()
+
+from app.main import app  # noqa: E402
+
+
+TEST_HEADERS = {"X-API-Key": os.environ["API_KEY"]}
 
 
 @pytest.fixture
 def client():
     transport = ASGITransport(app=app)
-    return AsyncClient(transport=transport, base_url="http://test")
+    return AsyncClient(transport=transport, base_url="http://test", headers=TEST_HEADERS)
 
 
 # ========================== Health ==========================

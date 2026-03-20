@@ -1,10 +1,14 @@
 """DataForge — Universal Data Formatter & Validator API."""
 
+import logging
 import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+logger = logging.getLogger("dataforge")
 
 from app.middleware import (
     RapidAPIAuthMiddleware,
@@ -70,6 +74,7 @@ app.add_middleware(
 # Global exception handler — never leak stack traces
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)
     return JSONResponse(
         status_code=500,
         content={

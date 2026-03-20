@@ -46,7 +46,7 @@ def format_phone(number: str, country_code: str | None = None, fmt: str = "e164"
         region = country_code.upper() if country_code else None
         parsed = phonenumbers.parse(number, region)
     except phonenumbers.NumberParseException as e:
-        return {"error": str(e), "input": number}
+        return {"valid": False, "error": str(e), "input": number}
 
     format_map = {
         "e164": phonenumbers.PhoneNumberFormat.E164,
