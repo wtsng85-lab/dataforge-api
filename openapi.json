@@ -1,0 +1,1052 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DataForge",
+    "description": "\n## DataForge \u2014 Universal Data Formatter & Validator API\n\nThe Swiss Army knife for data validation. One API to validate, format, and parse:\n\n- **Phone Numbers** \u2014 Validate, format (E.164/international/national), detect carrier & timezone\n- **IBAN** \u2014 Validate, extract bank code, BIC lookup\n- **Credit Cards** \u2014 Luhn check, card type detection (Visa, Mastercard, Amex, etc.)\n- **VAT Numbers** \u2014 EU VAT format validation (28 countries + UK)\n- **Postal Codes** \u2014 Validate ZIP/postal codes for 30+ countries\n- **Dates** \u2014 Convert between 15+ date formats, auto-detect format\n\n### Why DataForge?\nStop subscribing to 6 different validation APIs. DataForge bundles all structured data\nvalidation into a single, blazing-fast API with sub-50ms response times.\n\n### Use Cases\n- **Fintech** \u2014 Validate IBANs, credit cards, and VAT numbers at checkout\n- **E-commerce** \u2014 Validate shipping addresses and phone numbers internationally\n- **SaaS** \u2014 Clean and normalize user-submitted data at registration\n- **Data Pipelines** \u2014 Bulk validate and format phone numbers, dates, postal codes\n",
+    "contact": {
+      "name": "DataForge API",
+      "url": "https://rapidapi.com/"
+    },
+    "license": {
+      "name": "MIT"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/phone/validate": {
+      "get": {
+        "tags": [
+          "Phone"
+        ],
+        "summary": "Validate a phone number",
+        "description": "Validate a phone number and return parsed details including carrier, country, and timezone.",
+        "operationId": "phone_validate_phone_validate_get",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Phone number to validate",
+              "examples": [
+                "+14155552671"
+              ],
+              "title": "Number"
+            },
+            "description": "Phone number to validate"
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO country code",
+              "examples": [
+                "US"
+              ],
+              "title": "Country Code"
+            },
+            "description": "ISO country code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Phone"
+        ],
+        "summary": "Validate a phone number (POST)",
+        "description": "Validate a phone number via POST body.",
+        "operationId": "phone_validate_post_phone_validate_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhoneValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/format": {
+      "get": {
+        "tags": [
+          "Phone"
+        ],
+        "summary": "Format a phone number",
+        "description": "Format a phone number to a specific format (E.164, international, national, RFC3966).",
+        "operationId": "phone_format_phone_format_get",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Phone number",
+              "examples": [
+                "+14155552671"
+              ],
+              "title": "Number"
+            },
+            "description": "Phone number"
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO country code",
+              "title": "Country Code"
+            },
+            "description": "ISO country code"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Output format: e164, international, national, rfc3966",
+              "default": "e164",
+              "title": "Format"
+            },
+            "description": "Output format: e164, international, national, rfc3966"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phone/bulk-validate": {
+      "post": {
+        "tags": [
+          "Phone"
+        ],
+        "summary": "Bulk validate phone numbers",
+        "description": "Validate up to 100 phone numbers in a single request.",
+        "operationId": "phone_bulk_validate_phone_bulk_validate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkPhoneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/iban/validate": {
+      "get": {
+        "tags": [
+          "IBAN"
+        ],
+        "summary": "Validate an IBAN",
+        "description": "Validate an IBAN and extract bank code, account code, BIC, and bank name.",
+        "operationId": "iban_validate_iban_validate_get",
+        "parameters": [
+          {
+            "name": "iban",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "IBAN to validate",
+              "examples": [
+                "DE89370400440532013000"
+              ],
+              "title": "Iban"
+            },
+            "description": "IBAN to validate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "IBAN"
+        ],
+        "summary": "Validate an IBAN (POST)",
+        "description": "Validate an IBAN via POST body.",
+        "operationId": "iban_validate_post_iban_validate_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IBANValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/creditcard/validate": {
+      "get": {
+        "tags": [
+          "Credit Card"
+        ],
+        "summary": "Validate a credit card number",
+        "description": "Validate a credit card number using Luhn algorithm and detect card type (Visa, Mastercard, Amex, etc.).",
+        "operationId": "cc_validate_creditcard_validate_get",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Credit card number",
+              "examples": [
+                "4111111111111111"
+              ],
+              "title": "Number"
+            },
+            "description": "Credit card number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Credit Card"
+        ],
+        "summary": "Validate a credit card number (POST)",
+        "description": "Validate a credit card number via POST body.",
+        "operationId": "cc_validate_post_creditcard_validate_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditCardValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vat/validate": {
+      "get": {
+        "tags": [
+          "VAT"
+        ],
+        "summary": "Validate an EU VAT number",
+        "description": "Validate an EU VAT number format. Supports 28 EU countries + UK.",
+        "operationId": "vat_validate_vat_validate_get",
+        "parameters": [
+          {
+            "name": "vat_number",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "EU VAT number",
+              "examples": [
+                "DE123456789"
+              ],
+              "title": "Vat Number"
+            },
+            "description": "EU VAT number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "VAT"
+        ],
+        "summary": "Validate an EU VAT number (POST)",
+        "description": "Validate an EU VAT number via POST body.",
+        "operationId": "vat_validate_post_vat_validate_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VATValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/postalcode/validate": {
+      "get": {
+        "tags": [
+          "Postal Code"
+        ],
+        "summary": "Validate a postal/ZIP code",
+        "description": "Validate a postal/ZIP code for a given country. Supports 30+ countries.",
+        "operationId": "postal_validate_postalcode_validate_get",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Postal/ZIP code",
+              "examples": [
+                "10001"
+              ],
+              "title": "Code"
+            },
+            "description": "Postal/ZIP code"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "ISO country code",
+              "examples": [
+                "US"
+              ],
+              "title": "Country"
+            },
+            "description": "ISO country code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Postal Code"
+        ],
+        "summary": "Validate a postal/ZIP code (POST)",
+        "description": "Validate a postal/ZIP code via POST body.",
+        "operationId": "postal_validate_post_postalcode_validate_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostalCodeValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/date/convert": {
+      "get": {
+        "tags": [
+          "Date"
+        ],
+        "summary": "Convert a date between formats",
+        "description": "Convert a date string from one format to another. Supports 15+ date formats.",
+        "operationId": "date_convert_date_convert_get",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Date string",
+              "examples": [
+                "03/20/2026"
+              ],
+              "title": "Date"
+            },
+            "description": "Date string"
+          },
+          {
+            "name": "from_format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Source format",
+              "examples": [
+                "MM/DD/YYYY"
+              ],
+              "title": "From Format"
+            },
+            "description": "Source format"
+          },
+          {
+            "name": "to_format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Target format",
+              "examples": [
+                "ISO8601"
+              ],
+              "title": "To Format"
+            },
+            "description": "Target format"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Date"
+        ],
+        "summary": "Convert a date between formats (POST)",
+        "description": "Convert a date string via POST body.",
+        "operationId": "date_convert_post_date_convert_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateConvertRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/date/detect": {
+      "get": {
+        "tags": [
+          "Date"
+        ],
+        "summary": "Detect date format",
+        "description": "Detect the format of a date string. Returns all possible matches and flags ambiguity.",
+        "operationId": "date_detect_date_detect_get",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Date string to detect",
+              "examples": [
+                "2026-03-20"
+              ],
+              "title": "Date"
+            },
+            "description": "Date string to detect"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Date"
+        ],
+        "summary": "Detect date format (POST)",
+        "description": "Detect date format via POST body.",
+        "operationId": "date_detect_post_date_detect_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DateDetectRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "description": "Check API health and uptime.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BulkPhoneRequest": {
+        "properties": {
+          "numbers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Numbers",
+            "description": "List of phone numbers (max 100)"
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code",
+            "description": "Default country code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "numbers"
+        ],
+        "title": "BulkPhoneRequest"
+      },
+      "CreditCardValidateRequest": {
+        "properties": {
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "description": "Credit card number",
+            "examples": [
+              "4111111111111111"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "number"
+        ],
+        "title": "CreditCardValidateRequest"
+      },
+      "DateConvertRequest": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "Date string to convert",
+            "examples": [
+              "03/20/2026"
+            ]
+          },
+          "from_format": {
+            "type": "string",
+            "title": "From Format",
+            "description": "Source format name",
+            "examples": [
+              "MM/DD/YYYY"
+            ]
+          },
+          "to_format": {
+            "type": "string",
+            "title": "To Format",
+            "description": "Target format name",
+            "examples": [
+              "ISO8601"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "from_format",
+          "to_format"
+        ],
+        "title": "DateConvertRequest"
+      },
+      "DateDetectRequest": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "Date string to detect format of",
+            "examples": [
+              "2026-03-20"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "date"
+        ],
+        "title": "DateDetectRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IBANValidateRequest": {
+        "properties": {
+          "iban": {
+            "type": "string",
+            "title": "Iban",
+            "description": "IBAN to validate",
+            "examples": [
+              "DE89370400440532013000"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "iban"
+        ],
+        "title": "IBANValidateRequest"
+      },
+      "PhoneValidateRequest": {
+        "properties": {
+          "number": {
+            "type": "string",
+            "title": "Number",
+            "description": "Phone number to validate",
+            "examples": [
+              "+14155552671"
+            ]
+          },
+          "country_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Code",
+            "description": "ISO 3166-1 alpha-2 country code",
+            "examples": [
+              "US"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "number"
+        ],
+        "title": "PhoneValidateRequest"
+      },
+      "PostalCodeValidateRequest": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Postal/ZIP code",
+            "examples": [
+              "10001"
+            ]
+          },
+          "country": {
+            "type": "string",
+            "title": "Country",
+            "description": "ISO country code",
+            "examples": [
+              "US"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "country"
+        ],
+        "title": "PostalCodeValidateRequest"
+      },
+      "VATValidateRequest": {
+        "properties": {
+          "vat_number": {
+            "type": "string",
+            "title": "Vat Number",
+            "description": "EU VAT number",
+            "examples": [
+              "DE123456789"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "vat_number"
+        ],
+        "title": "VATValidateRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
