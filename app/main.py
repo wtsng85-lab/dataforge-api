@@ -57,7 +57,7 @@ _start_time = time.time()
 app = FastAPI(
     title="DataForge",
     description=DESCRIPTION,
-    version="2.0.0",
+    version="2.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     contact={"name": "DataForge API", "url": "https://rapidapi.com"},
@@ -107,7 +107,7 @@ app.include_router(crypto.router)
 async def root():
     return {
         "service": "DataForge",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "description": "Universal Data Formatter & Validator API",
         "docs": "/docs",
         "endpoints": {
@@ -132,6 +132,6 @@ async def health():
     return {
         "status": "ok",
         "service": "DataForge",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "uptime_seconds": round(uptime, 1),
     }

@@ -169,13 +169,14 @@ class ResponseCacheMiddleware(BaseHTTPMiddleware):
 
 
 class RequestTimingMiddleware(BaseHTTPMiddleware):
-    """Add response timing header."""
+    """Add response timing and version headers."""
 
     async def dispatch(self, request: Request, call_next):
         start = time.perf_counter()
         response = await call_next(request)
         elapsed = (time.perf_counter() - start) * 1000
         response.headers["X-Response-Time"] = f"{elapsed:.1f}ms"
+        response.headers["X-API-Version"] = "2.1.0"
         return response
 
 
