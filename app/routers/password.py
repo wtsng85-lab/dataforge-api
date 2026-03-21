@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter, Query
 
-from app.models import PasswordAnalyzeRequest
+from app.models import PasswordAnalyzeRequest, PasswordAnalyzeResponse
 from app.validators.password import analyze_password
 
 router = APIRouter(prefix="/password", tags=["Password"])
 
 
-@router.get("/analyze", summary="Analyze password strength")
+@router.get("/analyze", summary="Analyze password strength", response_model=PasswordAnalyzeResponse)
 async def password_analyze(
     password: str = Query(..., description="Password to analyze", examples=["MyP@ss123!"], max_length=200),
 ):
@@ -16,7 +16,7 @@ async def password_analyze(
     return analyze_password(password)
 
 
-@router.post("/analyze", summary="Analyze password strength (POST)")
+@router.post("/analyze", summary="Analyze password strength (POST)", response_model=PasswordAnalyzeResponse)
 async def password_analyze_post(req: PasswordAnalyzeRequest):
     """Analyze password strength via POST body."""
     return analyze_password(req.password)

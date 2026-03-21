@@ -1,6 +1,7 @@
 """Middleware for authentication, rate limiting, response caching, and request tracking."""
 
 import hashlib
+import hmac
 import logging
 import time
 import uuid

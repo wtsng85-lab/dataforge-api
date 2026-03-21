@@ -36,10 +36,29 @@ DETECTION_FORMATS = [
 ]
 
 
+_ALIASES = {
+    "ISO": "ISO8601",
+    "ISOFORMAT": "ISO8601",
+    "AMERICAN": "US",
+    "EUROPEAN": "EU",
+    "BRITISH": "UK",
+    "DOT": "DD.MM.YYYY",
+    "COMPACT": "YYYYMMDD",
+    "RFC": "RFC2822",
+}
+
+
+def _resolve_format(name: str) -> str | None:
+    """Resolve a format name (or alias) to a FORMAT_MAP pattern."""
+    key = name.strip().upper()
+    key = _ALIASES.get(key, key)
+    return FORMAT_MAP.get(key)
+
+
 def convert_date(date_str: str, from_format: str, to_format: str) -> dict:
     """Convert a date string from one format to another."""
-    from_fmt = FORMAT_MAP.get(from_format.upper())
-    to_fmt = FORMAT_MAP.get(to_format.upper())
+    from_fmt = _resolve_format(from_format)
+    to_fmt = _resolve_format(to_format)
 
     if not from_fmt:
         return {

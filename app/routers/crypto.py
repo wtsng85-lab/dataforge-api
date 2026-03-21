@@ -2,13 +2,13 @@
 
 from fastapi import APIRouter, Query
 
-from app.models import CryptoValidateRequest
+from app.models import CryptoValidateRequest, CryptoValidateResponse
 from app.validators.crypto import validate_crypto_address, SUPPORTED_CHAINS
 
 router = APIRouter(prefix="/crypto", tags=["Crypto"])
 
 
-@router.get("/validate", summary="Validate a crypto wallet address")
+@router.get("/validate", summary="Validate a crypto wallet address", response_model=CryptoValidateResponse)
 async def crypto_validate(
     address: str = Query(..., description="Wallet address to validate", examples=["1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"], max_length=128),
     chain: str | None = Query(None, description="Blockchain (btc, eth). Auto-detected if omitted.", max_length=10),
@@ -17,7 +17,7 @@ async def crypto_validate(
     return validate_crypto_address(address.strip(), chain)
 
 
-@router.post("/validate", summary="Validate a crypto wallet address (POST)")
+@router.post("/validate", summary="Validate a crypto wallet address (POST)", response_model=CryptoValidateResponse)
 async def crypto_validate_post(req: CryptoValidateRequest):
     """Validate a crypto wallet address via POST body."""
     return validate_crypto_address(req.address.strip(), req.chain)
