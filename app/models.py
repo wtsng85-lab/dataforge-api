@@ -12,6 +12,22 @@ def _coerce_optional_str(v):
     return None
 
 
+def _coerce_str_with_default(v, default: str) -> str:
+    """Coerce non-string values to default. For required str fields with defaults."""
+    if isinstance(v, str) and v:
+        return v
+    return default
+
+
+def _coerce_bool_with_default(v, default: bool) -> bool:
+    """Coerce non-bool values (e.g. {} from RapidAPI) to default."""
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return bool(v)
+    return default
+
+
 # --- Phone ---
 class PhoneValidateRequest(BaseModel):
     number: str = Field(..., description="Phone number to validate", examples=["+14155552671"])
@@ -32,6 +48,11 @@ class PhoneFormatRequest(BaseModel):
     @classmethod
     def clean_country_code(cls, v):
         return _coerce_optional_str(v)
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def clean_format(cls, v):
+        return _coerce_str_with_default(v, "e164")
 
 
 # --- IBAN ---
@@ -70,6 +91,11 @@ class DateDetectRequest(BaseModel):
 class EmailValidateRequest(BaseModel):
     email: str = Field(..., description="Email address to validate", examples=["user@example.com"])
     check_mx: bool = Field(True, description="Check MX records for domain")
+
+    @field_validator("check_mx", mode="before")
+    @classmethod
+    def clean_check_mx(cls, v):
+        return _coerce_bool_with_default(v, True)
 
 
 # --- Password ---

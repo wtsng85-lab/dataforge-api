@@ -683,6 +683,37 @@ async def test_crypto_post(client):
     assert data["valid"] is True
 
 
+# ========================== RapidAPI {} coercion ==========================
+
+@pytest.mark.anyio
+async def test_phone_post_country_code_empty_object(client):
+    """RapidAPI sends {} for unfilled optional fields instead of null."""
+    resp = await client.post("/phone/validate", json={"number": "+14155552671", "country_code": {}})
+    assert resp.status_code == 200
+    assert resp.json()["valid"] is True
+
+
+@pytest.mark.anyio
+async def test_crypto_post_chain_empty_object(client):
+    resp = await client.post("/crypto/validate", json={"address": "0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe", "chain": {}})
+    assert resp.status_code == 200
+    assert resp.json()["valid"] is True
+
+
+@pytest.mark.anyio
+async def test_email_post_check_mx_empty_object(client):
+    resp = await client.post("/email/validate", json={"email": "test@gmail.com", "check_mx": {}})
+    assert resp.status_code == 200
+    assert resp.json()["valid"] is True
+
+
+@pytest.mark.anyio
+async def test_bulk_phone_country_code_empty_object(client):
+    resp = await client.post("/phone/bulk-validate", json={"numbers": ["+14155552671"], "country_code": {}})
+    assert resp.status_code == 200
+    assert resp.json()["total"] == 1
+
+
 # ========================== Request ID ==========================
 
 @pytest.mark.anyio
