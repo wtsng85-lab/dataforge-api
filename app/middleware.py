@@ -124,12 +124,18 @@ class ResponseCacheMiddleware(BaseHTTPMiddleware):
         self._cache: TTLCache = TTLCache(maxsize=maxsize, ttl=ttl)
 
     def _cache_key(self, request: Request) -> str | None:
-        """Only cache GET requests."""
+        """Only cache GET requests. Include client identity to prevent cross-user cache leakage."""
         if request.method != "GET":
             return None
         if request.url.path in self.EXEMPT_PATHS:
             return None
-        raw = f"{request.url.path}?{request.url.query}"
+        # Include client identity in cache key to isolate per-user responses
+        client_id = (
+            request.headers.get("X-RapidAPI-User", "")
+            or request.headers.get("X-API-Key", "")
+            or request.client.host if request.client else "unknown"
+        )
+        raw = f"{client_id}:{request.url.path}?{request.url.query}"
         return hashlib.md5(raw.encode()).hexdigest()
 
     async def dispatch(self, request: Request, call_next):
