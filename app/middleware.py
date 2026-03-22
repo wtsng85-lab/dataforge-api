@@ -29,12 +29,12 @@ class RapidAPIAuthMiddleware(BaseHTTPMiddleware):
 
         # Check RapidAPI proxy secret
         rapid_secret = request.headers.get("X-RapidAPI-Proxy-Secret", "")
-        if settings.rapidapi_proxy_secret and rapid_secret == settings.rapidapi_proxy_secret:
+        if settings.rapidapi_proxy_secret and hmac.compare_digest(rapid_secret, settings.rapidapi_proxy_secret):
             return await call_next(request)
 
         # Check direct API key
         api_key = request.headers.get("X-API-Key", "")
-        if settings.api_key and api_key == settings.api_key:
+        if settings.api_key and hmac.compare_digest(api_key, settings.api_key):
             return await call_next(request)
 
         logger.warning("Unauthorized request: %s %s", request.method, request.url.path)
