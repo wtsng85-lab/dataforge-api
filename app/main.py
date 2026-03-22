@@ -72,7 +72,7 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=120)
 app.add_middleware(RapidAPIAuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://rapidapi.com"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
